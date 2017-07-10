@@ -1,9 +1,11 @@
 dependencies:
   '@types/chalk': 0.4.31
   '@types/common-tags': 1.2.5
+  '@types/lodash.throttle': 4.1.2
   '@types/node': 7.0.33
   chalk: 1.1.3
   common-tags: 1.4.0
+  lodash.throttle: 4.1.1
   log-update: 2.0.0
   ndjson: 1.5.0
   pnpm-logger: 0.4.0
@@ -21,6 +23,14 @@ packages:
   /@types/common-tags/1.2.5:
     resolution:
       integrity: sha1-FPKYk5kusyVZS4PXOa8C8rZSD0Y=
+  /@types/lodash.throttle/4.1.2:
+    dependencies:
+      '@types/lodash': 4.14.68
+    resolution:
+      integrity: sha1-UjVvo/pSsDJ+c+knY9YH92+c7Vs=
+  /@types/lodash/4.14.68:
+    resolution:
+      integrity: sha512-tndmbhJc7EeymtvgcZ0oX2H0P95VcT1FlAoeki3bl71DqL9zA/tbJcMZyR1kJkHDvr+57I7+gsn+BVPHIqgcbQ==
   /@types/node/7.0.33:
     resolution:
       integrity: sha512-8fVvl6Yyk3jZvSYxRMS9/AmZJ5RXCOP9N4xSlykyBViVESu751pxHYTN14Embn1Fem78YwEHdC7p7KGQQpwunw==
@@ -751,6 +761,9 @@ packages:
     dev: true
     resolution:
       integrity: sha1-dx7Hg540c9nEzeKLGTlMNWL09tM=
+  /lodash.throttle/4.1.1:
+    resolution:
+      integrity: sha1-wj6RtxAkKscMN/HhzaknTMOb8vQ=
   /lodash/4.17.2:
     dev: true
     resolution:
@@ -1350,11 +1363,13 @@ shrinkwrapVersion: 3
 specifiers:
   '@types/chalk': ^0.4.31
   '@types/common-tags': ^1.2.5
+  '@types/lodash.throttle': ^4.1.2
   '@types/node': ^7.0.0
   chalk: ^1.1.3
   commitizen: ^2.9.5
   common-tags: ^1.4.0
   ghooks: ^2.0.0
+  lodash.throttle: ^4.1.1
   log-update: ^2.0.0
   ndjson: ^1.5.0
   pnpm-logger: ^0.4.0
