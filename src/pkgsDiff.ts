@@ -3,6 +3,7 @@ import {
   DeprecationLog,
   Log,
 } from 'supi'
+import * as supi from 'supi'
 import xs, {Stream} from 'xstream'
 
 export interface PackageDiff {
@@ -26,17 +27,30 @@ export const propertyByDependencyType = {
   prod: 'dependencies',
 }
 
-export default (log$: xs<Log>, deprecationLog$: xs<DeprecationLog>) => {
-  const rootLog$ = log$.filter((log) => log.name === 'pnpm:root')
-
-  const deprecationSet$ = deprecationLog$
+export default function (
+  log$: {
+    progress: xs<supi.ProgressLog>,
+    stage: xs<supi.StageLog>,
+    deprecation: xs<supi.DeprecationLog>,
+    summary: xs<supi.Log>,
+    lifecycle: xs<supi.LifecycleLog>,
+    stats: xs<supi.StatsLog>,
+    installCheck: xs<supi.InstallCheckLog>,
+    registry: xs<supi.RegistryLog>,
+    root: xs<supi.RootLog>,
+    packageJson: xs<supi.PackageJsonLog>,
+    link: xs<supi.Log>,
+    other: xs<supi.Log>,
+  },
+) {
+  const deprecationSet$ = log$.deprecation
     .fold((acc, log) => {
       acc.add(log.pkgId)
       return acc
     }, new Set())
 
   const pkgsDiff$ = xs.combine(
-    rootLog$,
+    log$.root,
     deprecationSet$,
   )
   .fold((pkgsDiff, args) => {
@@ -81,8 +95,7 @@ export default (log$: xs<Log>, deprecationLog$: xs<DeprecationLog>) => {
     optional: Map<PackageDiff>,
   })
 
-  const packageJson$ = log$
-    .filter((log) => log.name === 'pnpm:package-json')
+  const packageJson$ = log$.packageJson
     .take(2)
     .fold(R.merge, {})
     .last()

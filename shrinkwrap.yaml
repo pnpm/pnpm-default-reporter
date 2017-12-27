@@ -12,6 +12,7 @@ dependencies:
   semver: 5.4.1
   stacktracey: 1.2.87
   xstream: 11.1.0
+  zen-push: 0.2.1
 devDependencies:
   '@pnpm/logger': 1.0.0
   '@types/tape': 4.2.31
@@ -4270,6 +4271,16 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-5a2ryKz0CPY4X8dklWhMiOavaJo=
+  /zen-observable/0.7.1:
+    dev: false
+    resolution:
+      integrity: sha512-OI6VMSe0yeqaouIXtedC+F55Sr6r9ppS7+wTbSexkYdHbdt4ctTuPNXP/rwm7GTVI63YBc+EBT0b0tl7YnJLRg==
+  /zen-push/0.2.1:
+    dependencies:
+      zen-observable: 0.7.1
+    dev: false
+    resolution:
+      integrity: sha512-Qv4qvc8ZIue51B/0zmeIMxpIGDVhz4GhJALBvnKs/FRa2T7jy4Ori9wFwaHVt0zWV7MIFglKAHbgnVxVTw7U1w==
 registry: 'https://registry.npmjs.org/'
 shrinkwrapMinorVersion: 4
 shrinkwrapVersion: 3
@@ -4298,6 +4309,7 @@ specifiers:
   tape: ^4.8.0
   ts-node: ^4.0.2
   tslint: ^5.7.0
-  typescript: ^2.1.5
+  typescript: ^2.6.2
   validate-commit-msg: ^2.8.2
   xstream: ^11.0.0
+  zen-push: ^0.2.1

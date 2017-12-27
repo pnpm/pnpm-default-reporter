@@ -52,7 +52,8 @@
     "ramda": "^0.25.0",
     "semver": "^5.4.1",
     "stacktracey": "^1.2.87",
-    "xstream": "^11.0.0"
+    "xstream": "^11.0.0",
+    "zen-push": "^0.2.1"
   },
   "devDependencies": {
     "@pnpm/logger": "^1.0.0",
@@ -67,7 +68,7 @@
     "tape": "^4.8.0",
     "ts-node": "^4.0.2",
     "tslint": "^5.7.0",
-    "typescript": "^2.1.5",
+    "typescript": "^2.6.2",
     "validate-commit-msg": "^2.8.2"
   },
   "config": {

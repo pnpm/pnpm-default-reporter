@@ -11,6 +11,7 @@ import {
   ProgressLog,
   RegistryLog,
 } from 'supi'
+import * as supi from 'supi'
 import xs, {Stream} from 'xstream'
 import getPkgsDiff, {
   PackageDiff,
@@ -28,34 +29,44 @@ const hlValue = chalk.blue
 const hlPkgId = chalk['whiteBright']
 
 export default function (
-  log$: xs<Log>,
+  log$: {
+    progress: xs<supi.ProgressLog>,
+    stage: xs<supi.StageLog>,
+    deprecation: xs<supi.DeprecationLog>,
+    summary: xs<supi.Log>,
+    lifecycle: xs<supi.LifecycleLog>,
+    stats: xs<supi.StatsLog>,
+    installCheck: xs<supi.InstallCheckLog>,
+    registry: xs<supi.RegistryLog>,
+    root: xs<supi.RootLog>,
+    packageJson: xs<supi.PackageJsonLog>,
+    link: xs<supi.Log>,
+    other: xs<supi.Log>,
+  },
   isRecursive: boolean,
   cmd?: string, // is optional only to be backward compatible
 ): Array<xs<xs<{msg: string}>>> {
   const outputs: Array<xs<xs<{msg: string}>>> = []
 
-  const progressLog$ = log$
-    .filter((log) => log.name === 'pnpm:progress') as Stream<ProgressLog>
-
   const resolutionDone$ = isRecursive
     ? xs.never()
-    : log$
-      .filter((log) => log.name === 'pnpm:stage' && log.message === 'resolution_done')
+    : log$.stage
+      .filter((log) => log.message === 'resolution_done')
       .mapTo(true)
       .take(1)
       .startWith(false)
 
-  const resolvingContentLog$ = progressLog$
+  const resolvingContentLog$ = log$.progress
     .filter((log) => log.status === 'resolving_content')
     .fold(R.inc, 0)
     .drop(1)
     .endWhen(resolutionDone$.last())
 
-  const fedtchedLog$ = progressLog$
+  const fedtchedLog$ = log$.progress
     .filter((log) => log.status === 'fetched')
     .fold(R.inc, 0)
 
-  const foundInStoreLog$ = progressLog$
+  const foundInStoreLog$ = log$.progress
     .filter((log) => log.status === 'found_in_store')
     .fold(R.inc, 0)
 
@@ -102,12 +113,12 @@ export default function (
 
   outputs.push(progressSummaryOutput$)
 
-  const tarballsProgressOutput$ = progressLog$
+  const tarballsProgressOutput$ = log$.progress
     .filter((log) => log.status === 'fetching_started' &&
       typeof log.size === 'number' && log.size >= BIG_TARBALL_SIZE)
     .map((startedLog) => {
       const size = prettyBytes(startedLog['size'])
-      return progressLog$
+      return log$.progress
         .filter((log) => log.status === 'fetching_progress' && log.pkgId === startedLog['pkgId'])
         .map((log) => log['downloaded'])
         .startWith(0)
@@ -124,13 +135,9 @@ export default function (
   outputs.push(tarballsProgressOutput$)
 
   if (!isRecursive) {
-    const deprecationLog$ = log$
-      .filter((log) => log.name === 'pnpm:deprecation') as Stream<DeprecationLog>
+    const pkgsDiff$ = getPkgsDiff(log$)
 
-    const pkgsDiff$ = getPkgsDiff(log$, deprecationLog$)
-
-    const summaryLog$ = log$
-      .filter((log) => log.name === 'pnpm:summary')
+    const summaryLog$ = log$.summary
       .take(1)
 
     const summaryOutput$ = xs.combine(
@@ -156,7 +163,7 @@ export default function (
 
     outputs.push(summaryOutput$)
 
-    const deprecationOutput$ = deprecationLog$
+    const deprecationOutput$ = log$.deprecation
       // print warnings only about deprecated packages from the root
       .filter((log) => log.depth === 0)
       .map((log) => {
@@ -171,7 +178,7 @@ export default function (
 
   const lifecycleMessages: {[pkgId: string]: string} = {}
   const lifecycleOutput$ = xs.of(
-    log$
+    log$.lifecycle
       .filter((log) => log.name === 'pnpm:lifecycle')
       .map((log: LifecycleLog) => {
         const key = `${log.script}:${log.pkgId}`
@@ -185,8 +192,7 @@ export default function (
 
   if (!isRecursive) {
     outputs.push(
-      log$
-        .filter((log) => log.name === 'pnpm:stats')
+      log$.stats
         .take((cmd === 'install' || cmd === 'update') ? 2 : 1)
         .fold((acc, log) => {
           if (typeof log['added'] === 'number') {
@@ -223,8 +229,7 @@ export default function (
         }),
     )
 
-    const installCheckOutput$ = log$
-      .filter((log) => log.name === 'pnpm:install-check')
+    const installCheckOutput$ = log$.installCheck
       .map(formatInstallCheck)
       .filter(Boolean)
       .map((msg) => ({msg}))
@@ -232,15 +237,14 @@ export default function (
 
     outputs.push(installCheckOutput$)
 
-    const registryOutput$ = log$
-      .filter((log) => log.name === 'pnpm:registry' && log.level === 'warn')
+    const registryOutput$ = log$.registry
+      .filter((log) => log.level === 'warn')
       .map((log: RegistryLog) => ({msg: formatWarn(log.message)}))
       .map(xs.of)
 
     outputs.push(registryOutput$)
 
-    const miscOutput$ = log$
-      .filter((log) => log.name as string === 'pnpm' || !isRecursive && log.name as string === 'pnpm:link')
+    const miscOutput$ = (!isRecursive ? xs.merge(log$.link, log$.other) : log$.other)
       .map((obj) => {
         if (obj.level === 'debug') return
         if (obj.level === 'warn') {
