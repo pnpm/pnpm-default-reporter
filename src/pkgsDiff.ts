@@ -1,10 +1,10 @@
+import most = require('most')
 import R = require('ramda')
 import {
   DeprecationLog,
   Log,
 } from 'supi'
 import * as supi from 'supi'
-import xs, {Stream} from 'xstream'
 
 export interface PackageDiff {
   added: boolean,
@@ -17,7 +17,7 @@ export interface PackageDiff {
   linked?: true,
 }
 
-interface Map<T> {
+export interface Map<T> {
   [index: string]: T,
 }
 
@@ -29,31 +29,32 @@ export const propertyByDependencyType = {
 
 export default function (
   log$: {
-    progress: xs<supi.ProgressLog>,
-    stage: xs<supi.StageLog>,
-    deprecation: xs<supi.DeprecationLog>,
-    summary: xs<supi.Log>,
-    lifecycle: xs<supi.LifecycleLog>,
-    stats: xs<supi.StatsLog>,
-    installCheck: xs<supi.InstallCheckLog>,
-    registry: xs<supi.RegistryLog>,
-    root: xs<supi.RootLog>,
-    packageJson: xs<supi.PackageJsonLog>,
-    link: xs<supi.Log>,
-    other: xs<supi.Log>,
+    progress: most.Stream<supi.ProgressLog>,
+    stage: most.Stream<supi.StageLog>,
+    deprecation: most.Stream<supi.DeprecationLog>,
+    summary: most.Stream<supi.Log>,
+    lifecycle: most.Stream<supi.LifecycleLog>,
+    stats: most.Stream<supi.StatsLog>,
+    installCheck: most.Stream<supi.InstallCheckLog>,
+    registry: most.Stream<supi.RegistryLog>,
+    root: most.Stream<supi.RootLog>,
+    packageJson: most.Stream<supi.PackageJsonLog>,
+    link: most.Stream<supi.Log>,
+    other: most.Stream<supi.Log>,
   },
 ) {
   const deprecationSet$ = log$.deprecation
-    .fold((acc, log) => {
+    .scan((acc, log) => {
       acc.add(log.pkgId)
       return acc
     }, new Set())
 
-  const pkgsDiff$ = xs.combine(
+  const pkgsDiff$ = most.combine(
+    (rootLog, deprecationSet) => [rootLog, deprecationSet],
     log$.root,
     deprecationSet$,
   )
-  .fold((pkgsDiff, args) => {
+  .scan((pkgsDiff, args) => {
     const rootLog = args[0]
     const deprecationSet = args[1] as Set<string>
     if (rootLog['added']) {
@@ -95,13 +96,12 @@ export default function (
     optional: Map<PackageDiff>,
   })
 
-  const packageJson$ = log$.packageJson
-    .take(2)
-    .fold(R.merge, {})
-    .last()
+  const packageJson$ = most.fromPromise(
+    log$.packageJson.take(2).reduce(R.merge, {}),
+  )
 
-  return xs.combine(pkgsDiff$, packageJson$)
-    .map(R.apply((pkgsDiff, packageJsons) => {
+  return most.combine(
+    (pkgsDiff, packageJsons) => {
       const initialPackageJson = packageJsons['initial']
       const updatedPackageJson = packageJsons['updated']
 
@@ -136,5 +136,8 @@ export default function (
         }
       }
       return pkgsDiff
-    }))
+    },
+    pkgsDiff$,
+    packageJson$,
+  )
 }
