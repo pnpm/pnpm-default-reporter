@@ -33,7 +33,7 @@ export function toOutput$ (
   const isRecursive = cmd === 'recursive'
   const obs = fromEvent(streamParser as EventEmitter, 'data')
   const log$ = xs.fromObservable<Log>(obs)
-  const outputs: Array<xs<xs<{msg: string}>>> = reporterForClient(log$, isRecursive)
+  const outputs: Array<xs<xs<{msg: string}>>> = reporterForClient(log$, isRecursive, cmd)
 
   return mergeOutputs(outputs)
 }

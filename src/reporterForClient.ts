@@ -30,6 +30,7 @@ const hlPkgId = chalk['whiteBright']
 export default function (
   log$: xs<Log>,
   isRecursive: boolean,
+  cmd?: string, // is optional only to be backward compatible
 ): Array<xs<xs<{msg: string}>>> {
   const outputs: Array<xs<xs<{msg: string}>>> = []
 
@@ -183,6 +184,45 @@ export default function (
   outputs.push(lifecycleOutput$)
 
   if (!isRecursive) {
+    outputs.push(
+      log$
+        .filter((log) => log.name === 'pnpm:stats')
+        .take((cmd === 'install' || cmd === 'update') ? 2 : 1)
+        .fold((acc, log) => {
+          if (typeof log['added'] === 'number') {
+            acc['added'] = log['added']
+          } else if (typeof log['removed'] === 'number') {
+            acc['removed'] = log['removed']
+          }
+          return acc
+        }, {})
+        .last()
+        .map((stats) => {
+          if (!stats['removed'] && !stats['added']) {
+            return xs.empty()
+          }
+
+          const limit = 100
+          let addSigns = (stats['added'] || 0)
+          let removeSigns = (stats['removed'] || 0)
+          const changes = addSigns + removeSigns
+          if (changes > limit) {
+            const p = limit / changes
+            addSigns = Math.floor(addSigns * p)
+            removeSigns = Math.floor(removeSigns * p)
+          }
+          let msg = EOL + 'Packages:'
+          if (stats['removed']) {
+            msg += ' ' + chalk.red(`-${stats['removed']}`)
+          }
+          if (stats['added']) {
+            msg += ' ' + chalk.green(`+${stats['added']}`)
+          }
+          msg += EOL + R.repeat(removedSign, removeSigns).join('') + R.repeat(addedSign, addSigns).join('')
+          return xs.of({msg})
+        }),
+    )
+
     const installCheckOutput$ = log$
       .filter((log) => log.name === 'pnpm:install-check')
       .map(formatInstallCheck)

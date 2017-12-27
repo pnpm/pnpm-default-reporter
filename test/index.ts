@@ -30,6 +30,7 @@ const deprecationLogger = logger<object>('deprecation')
 const summaryLogger = logger<object>('summary')
 const lifecycleLogger = logger<object>('lifecycle')
 const packageJsonLogger = logger<object>('package-json')
+const statsLogger = logger<object>('stats')
 
 test('prints progress beginning', t => {
   const output$ = toOutput$(createStreamParser())
@@ -546,4 +547,83 @@ test('prints progress of big files download', t => {
       complete: t.end,
       error: t.end,
     })
+})
+
+test('prints added/removed stats during installation', t => {
+  const output$ = toOutput$(createStreamParser(), 'install')
+
+  statsLogger.debug({ added: 5 })
+  statsLogger.debug({ removed: 1 })
+
+  t.plan(1)
+
+  output$.take(1).subscribe({
+    next: output => {
+      t.equal(output, '\n' + stripIndents`
+        Packages: ${chalk.red('-1')} ${chalk.green('+5')}
+        ${SUB}${ADD + ADD + ADD + ADD + ADD}`
+      )
+    },
+    complete: t.end,
+    error: t.end,
+  })
+})
+
+test('prints added/removed stats during installation when 0 removed', t => {
+  const output$ = toOutput$(createStreamParser(), 'install')
+
+  statsLogger.debug({ added: 2 })
+  statsLogger.debug({ removed: 0 })
+
+  t.plan(1)
+
+  output$.take(1).subscribe({
+    next: output => {
+      t.equal(output, '\n' + stripIndents`
+        Packages: ${chalk.green('+2')}
+        ${ADD + ADD}`
+      )
+    },
+    complete: t.end,
+    error: t.end,
+  })
+})
+
+test('prints only the added stats if nothing was removed', t => {
+  const output$ = toOutput$(createStreamParser(), 'install')
+
+  statsLogger.debug({ removed: 0 })
+  statsLogger.debug({ added: 1 })
+
+  t.plan(1)
+
+  output$.take(1).subscribe({
+    next: output => {
+      t.equal(output, '\n' + stripIndents`
+        Packages: ${chalk.green('+1')}
+        ${ADD}`
+      )
+    },
+    complete: t.end,
+    error: t.end,
+  })
+})
+
+test('prints just removed during uninstallation', t => {
+  const output$ = toOutput$(createStreamParser(), 'uninstall')
+
+  statsLogger.debug({ removed: 4 })
+
+  t.plan(1)
+
+  output$.take(1).subscribe({
+    next: output => {
+      t.equal(output, '\n' + stripIndents`
+        Packages: ${chalk.red('-4')}
+        ${SUB + SUB + SUB + SUB}`
+      )
+    },
+    complete: t.end,
+    error: t.end,
+  })
 })
