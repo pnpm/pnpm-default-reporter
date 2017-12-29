@@ -47,6 +47,7 @@ export default function (
   isRecursive: boolean,
   cmd?: string, // is optional only to be backward compatible
 ): Array<most.Stream<most.Stream<{msg: string}>>> {
+  const width = process.stdout.columns || 80
   const outputs: Array<most.Stream<most.Stream<{msg: string}>>> = []
 
   const resolutionDone$ = isRecursive
@@ -209,12 +210,11 @@ export default function (
           return most.empty()
         }
 
-        const limit = 100
         let addSigns = (stats['added'] || 0)
         let removeSigns = (stats['removed'] || 0)
         const changes = addSigns + removeSigns
-        if (changes > limit) {
-          const p = limit / changes
+        if (changes > width) {
+          const p = width / changes
           addSigns = Math.floor(addSigns * p)
           removeSigns = Math.floor(removeSigns * p)
         }
