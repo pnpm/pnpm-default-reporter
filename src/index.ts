@@ -11,6 +11,7 @@ import reporterForServer from './reporterForServer'
 export default function (
   streamParser: object,
   cmd?: string, // is optional only to be backward compatible
+  width?: number,
 ) {
   if (cmd === 'server') {
     const log$ = most.fromEvent<supi.Log>('data', streamParser)
@@ -28,6 +29,7 @@ export default function (
 export function toOutput$ (
   streamParser: object,
   cmd?: string, // is optional only to be backward compatible
+  width?: number,
 ): most.Stream<string> {
   const isRecursive = cmd === 'recursive'
   const progressPushStream = new PushStream()
@@ -98,7 +100,7 @@ export function toOutput$ (
     stats: most.from<supi.StatsLog>(statsPushStream.observable),
     summary: most.from<supi.Log>(summaryPushStream.observable),
   }
-  const outputs: Array<most.Stream<most.Stream<{msg: string}>>> = reporterForClient(log$, isRecursive, cmd)
+  const outputs: Array<most.Stream<most.Stream<{msg: string}>>> = reporterForClient(log$, isRecursive, cmd, width)
 
   return mergeOutputs(outputs).multicast()
 }

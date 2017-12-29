@@ -9,6 +9,7 @@ import {stripIndents} from 'common-tags'
 import chalk from 'chalk'
 import most = require('most')
 import StackTracey = require('stacktracey')
+import R = require('ramda')
 
 const WARN = chalk.bgYellow.black('\u2009WARN\u2009')
 const ERROR = chalk.bgRed.black('\u2009ERROR\u2009')
@@ -612,6 +613,46 @@ test('prints only the added stats if nothing was removed', t => {
       t.equal(output, stripIndents`
         Packages: ${chalk.green('+1')}
         ${ADD}`
+      )
+    },
+    complete: () => t.end(),
+    error: t.end,
+  })
+})
+
+test('prints at least one remove sign when removed !== 0', t => {
+  const output$ = toOutput$(createStreamParser(), 'install', 20)
+
+  statsLogger.debug({ removed: 1 })
+  statsLogger.debug({ added: 100 })
+
+  t.plan(1)
+
+  output$.take(1).subscribe({
+    next: output => {
+      t.equal(output, stripIndents`
+        Packages: ${chalk.red('-1')} ${chalk.green('+100')}
+        ${SUB}${R.repeat(ADD, 19).join('')}`
+      )
+    },
+    complete: () => t.end(),
+    error: t.end,
+  })
+})
+
+test('prints at least one add sign when added !== 0', t => {
+  const output$ = toOutput$(createStreamParser(), 'install', 20)
+
+  statsLogger.debug({ removed: 100 })
+  statsLogger.debug({ added: 1 })
+
+  t.plan(1)
+
+  output$.take(1).subscribe({
+    next: output => {
+      t.equal(output, stripIndents`
+        Packages: ${chalk.red('-100')} ${chalk.green('+1')}
+        ${R.repeat(SUB, 19).join('')}${ADD}`
       )
     },
     complete: () => t.end(),
