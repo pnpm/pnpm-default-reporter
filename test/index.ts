@@ -506,7 +506,7 @@ test('prints progress of big files download', async t => {
     attempt: 1,
   })
 
-  await delay(0) // w/o delay warning goes below for some reason. Started to happen after switch to most
+  await delay(0)
 
   progressLogger.debug({
     status: 'fetching_progress',
@@ -544,7 +544,7 @@ test('prints progress of big files download', async t => {
     attempt: 1,
   })
 
-  await delay(0) // w/o delay warning goes below for some reason. Started to happen after switch to most
+  await delay(0)
 
   progressLogger.debug({
     status: 'fetching_progress',
