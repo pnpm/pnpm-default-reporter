@@ -569,7 +569,7 @@ test('prints added/removed stats during installation', t => {
 
   output$.take(1).subscribe({
     next: output => {
-      t.equal(output, '\n' + stripIndents`
+      t.equal(output, stripIndents`
         Packages: ${chalk.red('-1')} ${chalk.green('+5')}
         ${SUB}${ADD + ADD + ADD + ADD + ADD}`
       )
@@ -589,7 +589,7 @@ test('prints added/removed stats during installation when 0 removed', t => {
 
   output$.take(1).subscribe({
     next: output => {
-      t.equal(output, '\n' + stripIndents`
+      t.equal(output, stripIndents`
         Packages: ${chalk.green('+2')}
         ${ADD + ADD}`
       )
@@ -609,7 +609,7 @@ test('prints only the added stats if nothing was removed', t => {
 
   output$.take(1).subscribe({
     next: output => {
-      t.equal(output, '\n' + stripIndents`
+      t.equal(output, stripIndents`
         Packages: ${chalk.green('+1')}
         ${ADD}`
       )
@@ -628,7 +628,7 @@ test('prints just removed during uninstallation', t => {
 
   output$.take(1).subscribe({
     next: output => {
-      t.equal(output, '\n' + stripIndents`
+      t.equal(output, stripIndents`
         Packages: ${chalk.red('-4')}
         ${SUB + SUB + SUB + SUB}`
       )

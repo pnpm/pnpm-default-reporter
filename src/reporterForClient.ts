@@ -218,7 +218,7 @@ export default function (
           addSigns = Math.floor(addSigns * p)
           removeSigns = Math.floor(removeSigns * p)
         }
-        let msg = EOL + 'Packages:'
+        let msg = 'Packages:'
         if (stats['removed']) {
           msg += ' ' + chalk.red(`-${stats['removed']}`)
         }
