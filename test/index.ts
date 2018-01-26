@@ -385,7 +385,27 @@ test['skip']('prints lifecycle progress', t => {
   })
 })
 
-test('prints generic error', t => {
+test.only('prints generic error', t => {
+  const output$ = toOutput$(createStreamParser(), 'recursive')
+
+  const err = new Error('some error')
+  logger.error(err)
+
+  t.plan(1)
+
+  output$.take(1).subscribe({
+    next: output => {
+      t.equal(output, stripIndents`
+        ${ERROR} ${chalk.red('some error')}
+        ${new StackTracey(err.stack).pretty}
+      `)
+    },
+    complete: () => t.end(),
+    error: t.end,
+  })
+})
+
+test('prints generic error when recursive install fails', t => {
   const output$ = toOutput$(createStreamParser())
 
   const err = new Error('some error')
