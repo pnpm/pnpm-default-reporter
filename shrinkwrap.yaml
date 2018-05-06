@@ -12,8 +12,7 @@ dependencies:
   most-last: 1.0.1
   ndjson: 1.5.0
   normalize-path: 3.0.0
-  pnpm-default-reporter: 'link:../__package_previews__/pnpm-default-reporter/pnpm-default-reporter'
-  pretty-bytes: 4.0.2
+  pretty-bytes: 5.0.0
   ramda: 0.25.0
   right-pad: 1.0.1
   semver: 5.5.0
@@ -35,7 +34,7 @@ devDependencies:
   rimraf: 2.6.2
   supi: 0.16.9
   tape: 4.9.0
-  ts-node: 6.0.2
+  ts-node: 6.0.3
   tslint: 5.10.0
   typescript: 2.8.3
   validate-commit-msg: 2.14.0
@@ -2723,12 +2722,12 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-gV7R9uvGWSb4ZbMQwHE7yzMVzks=
-  /pretty-bytes/4.0.2:
+  /pretty-bytes/5.0.0:
     dev: false
     engines:
-      node: '>=4'
+      node: '>=6'
     resolution:
-      integrity: sha1-sr+C5zUNZcbDOqlaqlpPYyf2HNk=
+      integrity: sha512-y2vTE3T7ODiNA8FL/x6QpSuG0yKu6M6aIXUCbKzFZ4/6EG4CazYu/eyMWweukcCRTrOOypBe5R8xZU0aE0X9JA==
   /pretty-ms/2.1.0:
     dependencies:
       is-finite: 1.0.2
@@ -3527,7 +3526,7 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-tAPQuRvlDDMd/EuC7s6yLD3hbSA=
-  /ts-node/6.0.2:
+  /ts-node/6.0.3:
     dependencies:
       arrify: 1.0.1
       chalk: 2.4.1
@@ -3541,7 +3540,7 @@ packages:
     engines:
       node: '>=4.2.0'
     resolution:
-      integrity: sha512-H/KWK27B3JJAc5WFOBBUxN638DukbV8PptdQgiHWPO2SGDVJzuVOl8Ye0XJ5+FiZIdFtgUuGOJRV4c/XBQ5dBg==
+      integrity: sha512-ARaOMNFEPKg2ZuC1qJddFvHxHNFVckR0g9xLxMIoMqSSIkDc8iS4/LoV53EdDWWNq2FGwqcEf0bVVGJIWpsznw==
   /tslib/1.9.0:
     dev: true
     resolution:
@@ -3804,7 +3803,7 @@ specifiers:
   normalize-newline: ^3.0.0
   normalize-path: ^3.0.0
   package-preview: ^1.0.0
-  pretty-bytes: ^4.0.2
+  pretty-bytes: ^5.0.0
   ramda: ^0.25.0
   right-pad: ^1.0.1
   rimraf: ^2.5.4
